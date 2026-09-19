@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "people-analytics"
+version = "0.1.0"
+description = "People Movement Analytics in fixed-camera video"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra"
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: integration tests requiring local weights or dataset files",
+]
+

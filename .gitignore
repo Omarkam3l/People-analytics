@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Dataset folders and weights
+MOT17/
+MOT17Labels/
+*.zip
+*.pt
+
+
+.v3code/
