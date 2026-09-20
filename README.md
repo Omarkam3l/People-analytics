@@ -1,188 +1,197 @@
 # People Movement Analytics
 
-A Computer Vision system for analyzing human movement in fixed-camera video.
+A high-integrity Computer Vision and dual-space spatial analytics system for analyzing human movement in fixed-camera video.
 
-The system detects and tracks people, extracts their footpoints, builds movement trajectories, generates spatial heatmaps, and calculates dwell time inside defined regions.
-
-The project is designed as an end-to-end Computer Vision and spatial analytics project, with an emphasis on understanding the underlying geometry and algorithms rather than treating the system as a black box.
+The system detects and tracks pedestrians, extracts bottom-center ground contact points (footpoints), constructs historical trajectories with gap preservation, accumulates spatial density heatmaps, evaluates multi-zone polygon memberships, calculates dwell times with visit state machines, and projects coordinates between camera perspective and planar bird's-eye ground coordinates via homography.
 
 ---
 
-## Core Pipeline
+## Dual-Space Pipeline Architecture
 
-Video
-  ↓
-Person Detection
-  ↓
-Multi-Object Tracking
-  ↓
-Bounding Boxes
-  ↓
-Footpoint Extraction
-  ↓
-Trajectory Generation
-  ↓
-┌───────────────────┐
-│                   │
-▼                   ▼
-Heatmap          Dwell Time
-│                   │
-└─────────┬─────────┘
-          ▼
-     Spatial Analytics
-
-Future extension:
-
-Footpoint
-    ↓
-Homography
-    ↓
-Ground-Plane Coordinates
-    ↓
-Real-World Spatial Analytics
-
----
-
-## Main Goals
-
-The system should:
-
-1. Detect people in video.
-2. Track each person across frames.
-3. Maintain a stable identity (`track_id`) for each tracked person.
-4. Extract a footpoint from each person's bounding box.
-5. Build trajectories from sequential footpoints.
-6. Generate spatial heatmaps.
-7. Define spatial zones.
-8. Calculate how long each tracked person remains inside each zone.
-9. Produce aggregate dwell-time statistics.
-10. Evaluate the quality of the system using ground-truth annotations where available.
+```text
+                           Video Frames (MOT17)
+                                    │
+                                    ▼
+                         Person Detection (YOLOv8)
+                                    │
+                                    ▼
+                       Multi-Object Tracking (ByteTrack)
+                                    │
+                                    ▼
+                        Footpoint Extraction (Bottom-Center)
+                                    │
+         ┌──────────────────────────┴──────────────────────────┐
+         │                                                     │
+         ▼ (Image Space)                                       ▼ (Planar Projection)
+┌───────────────────────────────┐                     ┌─────────────────────────────────┐
+│ Image Trajectory Builder      │                     │ Homography Projector            │
+│ (Gap preservation, lifespan)  │                     │ (4-point planar H, condition #) │
+│                               │                     └────────────────┬────────────────┘
+│ Image Heatmap Accumulator     │                                      │
+│ (Strict OOB rejection)        │                                      ▼ (Ground Space)
+│                               │                     ┌─────────────────────────────────┐
+│ Image Zone Engine             │                     │ Ground Trajectory Builder       │
+│ (Ray-casting polygon tests)   │                     │ (Extrapolation policy aware)    │
+│                               │                     │                                 │
+│ Image Dwell Engine            │                     │ Ground Heatmap Accumulator      │
+│ (Visit state machine)         │                     │ (Planar density grid)           │
+└───────────────┬───────────────┘                     │                                 │
+                │                                     │ Ground Zone Engine              │
+                │                                     │ (Planar polygon memberships)    │
+                │                                     │                                 │
+                │                                     │ Ground Dwell Engine             │
+                │                                     │ (Ground-plane visit tracking)   │
+                │                                     └────────────────┬────────────────┘
+                │                                                      │
+                └───────────────────────┬──────────────────────────────┘
+                                        ▼
+                     Cross-Space Comparative Analytics
+                     (Visit correlation & spatial agreement)
+                                        │
+                                        ▼
+                     Mathematical Conservation Audit
+                     (AC-03 to AC-07 Formal Invariants)
+```
 
 ---
 
-## Dataset
+## Scientific Scope & Coordinate Limitation
 
-The initial dataset is MOT17 from the MOTChallenge benchmark.
-
-MOT17 is used as the primary dataset for:
-
-- Person detection
-- Multi-object tracking
-- Trajectory generation
-- Footpoint extraction
-- Heatmap generation
-- Dwell-time experiments
-- Evaluation
-
-The project does not initially require a custom dataset.
-
-A future version may use datasets containing camera calibration and world-coordinate ground truth for accurate ground-plane projection.
+> [!IMPORTANT]
+> **Planar Coordinate Semantics**:
+> Ground-plane coordinates operate strictly within `CoordinateFrame.ARBITRARY_PLANAR` using reproducible, controlled manual calibration fixtures.
+> Arbitrary planar units must **NOT** be interpreted as physical meters, nor as evidence of higher physical metric accuracy. Cross-space comparison is strictly a coordinate-representation evaluation comparing perspective image-plane measurements with planar bird's-eye representations.
 
 ---
 
-## Important Concepts
+## Project Status: Phases 1–12 Completed & Frozen
 
-This project combines several Computer Vision concepts:
-
-- Object Detection
-- Multi-Object Tracking
-- Bounding Boxes
-- Footpoint Localization
-- Coordinate Systems
-- Perspective Geometry
-- Homography
-- Ground-Plane Projection
-- Trajectory Analysis
-- Spatial Density
-- Heatmaps
-- Zone Analysis
-- Dwell Time
-- Evaluation Metrics
+| Phase | Description | Status |
+| :--- | :--- | :---: |
+| **Phase 1** | Project initialization, MOT17 dataset parsing, schema definitions | ✅ **Frozen** |
+| **Phase 2** | YOLOv8 person detector, local greedy IoU detection evaluation | ✅ **Frozen** |
+| **Phase 3** | ByteTrack multi-object tracker, CLEAR MOT & IDF1 evaluation | ✅ **Frozen** |
+| **Phase 4** | Bottom-center footpoint localization and normalization | ✅ **Frozen** |
+| **Phase 5** | Trajectory builder with chronological gap preservation | ✅ **Frozen** |
+| **Phase 6** | Grid-based 2D heatmap accumulator with strict OOB rejection | ✅ **Frozen** |
+| **Phase 7** | Spatial zone engine with ray-casting polygon containment | ✅ **Frozen** |
+| **Phase 8** | Dwell time engine with per-zone visit state machines | ✅ **Frozen** |
+| **Phase 9** | End-to-end integration and composite diagnostic visualizer | ✅ **Frozen** |
+| **Phase 10** | Homography projection engine with ROI boundary checks | ✅ **Frozen** |
+| **Phase 11** | Ground-plane movement analytics (Trajectories, Heatmaps, Zones, Dwell) | ✅ **Frozen** |
+| **Phase 12** | Full-system dual-space evaluation, mathematical conservation audits, reproducibility | ✅ **Frozen** |
 
 ---
 
-## Project Philosophy
+## Mathematical Conservation Invariants (AC-03 to AC-07)
 
-The project should prioritize understanding and correctness over unnecessary complexity.
+Every execution is strictly validated by 7 mathematical conservation equations:
 
-A pretrained detector may be used initially.
-
-Training a custom detector is optional and should only be introduced when there is a clear reason to do so.
-
-The first implementation should establish a correct end-to-end pipeline before introducing model fine-tuning, multi-camera fusion, or advanced 3D geometry.
-
----
-
-## Current Scope
-
-### In Scope
-
-- MOT17
-- Person detection
-- Single-camera tracking
-- Track IDs
-- Footpoint extraction
-- Trajectories
-- Heatmaps
-- Zone definition
-- Dwell-time calculation
-- Basic evaluation
-- Visualization
-
-### Future Scope
-
-- Custom detector training
-- Homography-based ground-plane projection
-- Real-world coordinates
-- Multi-camera tracking
-- Cross-camera identity association
-- Advanced spatial analytics
-- Real-time processing
-- Web dashboard
+1. **Projection Conservation (AC-03)**:
+   $$\text{Total Projected} \equiv \text{Valid In-ROI} + \text{Valid Extrapolated} + \text{Invalid}$$
+2. **Image Heatmap Conservation (AC-04)**:
+   $$\text{Total Footpoints} \equiv \text{Accumulated} + \text{Out of Bounds} + \text{Invalid}$$
+3. **Ground Heatmap Conservation (AC-05)**:
+   $$\text{Total Projected} \equiv \text{Accumulated} + \text{Out of Bounds} + \text{Invalid} + \text{Extrapolated Rejected}$$
+4. **Image Zone Partition Conservation (AC-06a)**:
+   $$\text{Total Footpoints} \equiv \text{Inside} \ge 1\text{ Zone} + \text{Outside All Zones}$$
+5. **Ground Zone Partition Conservation (AC-06b)**:
+   $$\text{Analytics Accepted} \equiv \text{Inside} \ge 1\text{ Zone} + \text{Outside All Zones}$$
+6. **Image Dwell Overlap Conservation (AC-07a)**:
+   $$\sum \text{Dwell Observations per Zone Visit} \equiv \text{Total Zone Memberships Across Zones}$$
+7. **Ground Dwell Overlap Conservation (AC-07b)**:
+   $$\sum \text{Ground Dwell Observations per Zone Visit} \equiv \text{Total Ground Zone Memberships Across Zones}$$
 
 ---
 
-## Non-Goals for the Initial Version
+## Full-Sequence Benchmark Results
 
-The initial version will NOT attempt to:
+Evaluated across complete MOT17 benchmark sequences under frozen contracts:
 
-- Build a complete production surveillance platform.
-- Solve multi-camera identity association.
-- Train a detector from scratch.
-- Build a web application.
-- Implement 3D reconstruction.
-- Optimize for real-time performance before correctness is established.
-
----
-
-## Expected Output
-
-The system should eventually produce:
-
-- Annotated video
-- Bounding boxes
-- Track IDs
-- Footpoints
-- Trajectory visualization
-- Heatmap
-- Zone occupancy
-- Per-person dwell time
-- Per-zone dwell statistics
-- Evaluation metrics
-- Machine-readable analytics output
+| Metric Category | Metric | MOT17-09-FRCNN (Primary) | MOT17-02-FRCNN (Secondary) |
+| :--- | :--- | :---: | :---: |
+| **Sequence Profile** | Frames Processed | **525 / 525** (100%) | **600 / 600** (100%) |
+| | Resolution & FPS | 1920×1080 @ 30.0 FPS | 1920×1080 @ 30.0 FPS |
+| **Detection (Phase 2)** | True Positives (TP) | 2,154 | 3,667 |
+| | Precision / Recall / F1 | 0.8875 / 0.4047 / 0.5557 | 0.8918 / 0.1974 / 0.3232 |
+| **Tracking (Phase 3)** | MOTA / IDF1 | 0.2974 / 0.5401 | 0.1713 / 0.2187 |
+| | ID Switches (IDSW) | 22 | 52 |
+| **Trajectories** | Total Trajectories | 37 | 88 |
+| | Total Observations | 3,989 | 3,975 |
+| | Coverage Ratio | 0.9429 | 0.8783 |
+| **Spatial Analytics** | Image Heatmap Count | 3,986 (3 OOB) | 3,974 (1 OOB) |
+| | Ground Heatmap Count | 2,144 in-ROI (1,845 extrap) | 2,995 in-ROI (980 extrap) |
+| | Image Dwell Time | 87.53s across 131 visits | 103.77s across 234 visits |
+| | Ground Dwell Time | 54.37s across 90 visits | 96.03s across 210 visits |
+| | Representation Agreement | **80.32%** (3,204 / 3,989) | **85.38%** (3,394 / 3,975) |
+| **Conservation Audit** | All 7 Invariants | ✅ **ALL PASSED** | ✅ **ALL PASSED** |
+| **Reproducibility** | AC-08 Verification | ✅ **REPRODUCIBLE** | ✅ **REPRODUCIBLE** |
 
 ---
 
-## Development Workflow
+## Quick Start
 
-The project follows:
+### 1. Installation
 
-Specification
-→ Implementation
-→ Tests
-→ Engineering Audit
-→ Targeted Hardening
-→ API Freeze
-→ Next Phase
+```bash
+git clone https://github.com/Omarkam3l/People-analytics.git
+cd People-analytics
+pip install -e .
+```
 
-Architecture should remain stable between approved phases unless an audit identifies a concrete architectural problem.
+### 2. Run Full Regression Test Suite
+
+```bash
+# Complete unit and integration suite (222 tests)
+python -m pytest -v
+
+# Gated full-sequence integration suite (525/600 frames)
+$env:RUN_FULL_SEQUENCE="1"; python -m pytest tests/test_full_sequence_evaluation.py -v
+```
+
+### 3. Run Full-System Evaluation CLI
+
+```bash
+# Run Primary Sequence (525 frames) with AC-08 reproducibility check and visual export:
+python src/people_analytics/evaluation/run_full_evaluation.py \
+  --sequence MOT17-09-FRCNN \
+  --reproducibility-check \
+  --visualize \
+  --output-dir reports/phase12_evaluation
+
+# Run Secondary Sequence (600 frames):
+python src/people_analytics/evaluation/run_full_evaluation.py \
+  --sequence MOT17-02-FRCNN \
+  --visualize \
+  --output-dir reports/phase12_evaluation
+
+# Run Consolidated Multi-Sequence Evaluation:
+python src/people_analytics/evaluation/run_full_evaluation.py \
+  --sequence all \
+  --output-dir reports/phase12_evaluation
+```
+
+---
+
+## Evaluation Reports & Artifacts
+
+All evaluation artifacts and visual diagnostics are located in [`reports/phase12_evaluation/`](reports/phase12_evaluation):
+
+- [Consolidated Phase 12 Evaluation Report](reports/phase12_evaluation/PHASE_12_EVALUATION_REPORT.md)
+- [MOT17-09 Evaluation Report](reports/phase12_evaluation/PHASE_12_EVALUATION_REPORT_MOT17_09.md)
+- [MOT17-02 Evaluation Report](reports/phase12_evaluation/PHASE_12_EVALUATION_REPORT_MOT17_02.md)
+- [Phase 12 Engineering Specification](PHASE_12_SPECIFICATION.md)
+- [MOT17-09 Dual-View Composite Artifact](reports/phase12_evaluation/mot17_09_frcnn_dual_view_composite.png)
+- [MOT17-09 Ground Heatmap Artifact](reports/phase12_evaluation/mot17_09_frcnn_ground_heatmap.png)
+- [MOT17-02 Dual-View Composite Artifact](reports/phase12_evaluation/mot17_02_frcnn_dual_view_composite.png)
+- [MOT17-02 Ground Heatmap Artifact](reports/phase12_evaluation/mot17_02_frcnn_ground_heatmap.png)
+
+---
+
+## Engineering Methodology
+
+The project adheres strictly to an audited, phase-gated engineering methodology:
+
+$$\text{Specification} \longrightarrow \text{Implementation} \longrightarrow \text{Tests} \longrightarrow \text{Engineering Audit} \longrightarrow \text{Targeted Hardening} \longrightarrow \text{API Freeze}$$
+
+Architecture, APIs, and evaluation contracts remain frozen between approved phases.

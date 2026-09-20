@@ -30,10 +30,24 @@ class Zone:
     def contains_point(self, x: float, y: float, inclusive: bool = True) -> bool:
         """Test if the point (x, y) lies inside this zone.
 
+        Semantics:
+            When inclusive=True:
+                - interior -> True
+                - boundary edge -> True
+                - vertex -> True
+                - exterior -> False
+
+            When inclusive=False:
+                - interior -> True
+                - boundary edge -> False
+                - vertex -> False
+                - exterior -> False
+
         Args:
             x: Horizontal image-space pixel coordinate.
             y: Vertical image-space pixel coordinate.
             inclusive: If True, points on polygon edges or vertices evaluate as inside.
+                If False, points on edges or vertices evaluate as outside.
 
         Returns:
             True if point is inside the zone, False otherwise.
@@ -65,5 +79,14 @@ class ZoneMembership:
 
     @property
     def primary_zone_id(self) -> Optional[str]:
-        """First matched zone ID, or None if outside all zones."""
-        return self.zone_ids[0] if self.zone_ids else None
+        """The single matched zone ID if exactly one zone matches; otherwise None.
+
+        Semantics:
+            - zero matched zones -> None
+            - exactly one matched zone -> that zone ID
+            - multiple matched zones -> None
+
+        Do not silently choose a winner among overlapping zones.
+        The authoritative representation remains zone_ids.
+        """
+        return self.zone_ids[0] if len(self.zone_ids) == 1 else None

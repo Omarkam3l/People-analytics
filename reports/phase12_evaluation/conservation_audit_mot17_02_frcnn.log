@@ -1,0 +1,15 @@
+================================================================================
+CONSERVATION AUDIT LOG: MOT17-02-FRCNN (600 frames)
+================================================================================
+Invariant ID | Status   | Equation Balance                    | Details
+--------------------------------------------------------------------------------
+AC-03: Pro | PASSED   | 3975 == 3975                        | N_projected (3975) == In-ROI (2995) + Extrapolated (980) + Invalid (0)
+AC-04: Ima | PASSED   | 3975 == 3975                        | N_footpoints (3975) == Accumulated (3974) + OOB (1) + Invalid (0)
+AC-05: Gro | PASSED   | 3975 == 3975                        | N_ground_input (3975) == Accumulated (2995) + OOB (980) + Invalid (0) + ExtrapRejected (0)
+AC-06a: Im | PASSED   | 3975 == 3975                        | N_footpoints (3975) == Inside (2882) + Outside (1093)
+AC-06b: Gr | PASSED   | 3975 == 3975                        | N_ground_obs (3975) == Inside (2539) + Outside (1436)
+AC-07a: Im | PASSED   | 3347 == 3347                        | Total Dwell Observations (3347) == Total Zone Assignments (3347)
+AC-07b: Gr | PASSED   | 3013 == 3013                        | Total Ground Dwell Observations (3013) == Total Ground Zone Assignments (3013)
+--------------------------------------------------------------------------------
+Overall Audit Status: ALL PASSED
+================================================================================

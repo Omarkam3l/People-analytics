@@ -147,12 +147,20 @@ def is_point_in_polygon(
     inclusive: bool = True,
     tol: float = 1e-7,
 ) -> bool:
-    """Test if point pt lies inside polygon using closed-boundary inclusive ray-casting.
+    """Test if point pt lies inside polygon with explicit boundary semantics.
 
     Semantics:
-        - Points strictly inside evaluate to True.
-        - Points strictly outside evaluate to False.
-        - Points lying on an edge or vertex evaluate to True when inclusive=True.
+        When inclusive=True:
+            - interior -> True
+            - boundary edge -> True
+            - vertex -> True
+            - exterior -> False
+
+        When inclusive=False:
+            - interior -> True
+            - boundary edge -> False
+            - vertex -> False
+            - exterior -> False
 
     Args:
         pt: Coordinate (x, y).
@@ -169,13 +177,12 @@ def is_point_in_polygon(
 
     px, py = pt
 
-    # 1. Closed-boundary check: test if point lies directly on any boundary segment
-    if inclusive:
-        for i in range(n):
-            p1 = vertices[i]
-            p2 = vertices[(i + 1) % n]
-            if is_point_on_segment(pt, p1, p2, tol=tol):
-                return True
+    # 1. Boundary check: test if point lies directly on any boundary segment
+    for i in range(n):
+        p1 = vertices[i]
+        p2 = vertices[(i + 1) % n]
+        if is_point_on_segment(pt, p1, p2, tol=tol):
+            return inclusive
 
     # 2. Standard ray-casting (crossing number) for interior testing
     # Cast a horizontal ray to the right: (px, py) to (+inf, py)

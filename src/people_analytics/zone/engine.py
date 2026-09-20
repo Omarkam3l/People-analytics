@@ -77,13 +77,14 @@ class ZoneEngine:
             inclusive: If True, edge and vertex points evaluate as inside.
 
         Returns:
-            Tuple of matching zone_ids in registration order (empty if outside all zones).
+            Tuple of matching zone_ids sorted lexicographically (empty if outside all zones).
+            This ensures deterministic results independent of zone registration order.
         """
         matched = []
         for zone_id, zone in self._zones.items():
             if zone.contains_point(x, y, inclusive=inclusive):
                 matched.append(zone_id)
-        return tuple(matched)
+        return tuple(sorted(matched))
 
     def evaluate_observation(
         self,

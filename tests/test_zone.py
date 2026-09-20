@@ -165,15 +165,114 @@ def test_overlapping_zones_independent_evaluation():
     m = engine.evaluate_observation(obs_overlap)
     assert m.is_in_zone is True
     assert m.zone_ids == ("A", "B")
-    assert m.primary_zone_id == "A"
+    assert m.primary_zone_id is None  # Multiple matches produce None (no arbitrary tie-breaking)
 
     # Point in Zone A only (50, 50)
     m_a = engine.evaluate_observation(FootpointObservation(1, 1, 50.0, 50.0))
     assert m_a.zone_ids == ("A",)
+    assert m_a.primary_zone_id == "A"
 
     # Point in Zone B only (200, 200)
     m_b = engine.evaluate_observation(FootpointObservation(1, 1, 200.0, 200.0))
     assert m_b.zone_ids == ("B",)
+    assert m_b.primary_zone_id == "B"
+
+
+def test_primary_zone_id_semantics():
+    """Verify primary_zone_id returns single zone ID or None for 0 or multiple matches."""
+    # Zero matched zones
+    m_zero = ZoneMembership(track_id=1, frame_index=1, x=10.0, y=10.0, zone_ids=())
+    assert m_zero.primary_zone_id is None
+    assert m_zero.is_in_zone is False
+
+    # Exactly one matched zone
+    m_one = ZoneMembership(track_id=1, frame_index=1, x=10.0, y=10.0, zone_ids=("Zone1",))
+    assert m_one.primary_zone_id == "Zone1"
+    assert m_one.is_in_zone is True
+
+    # Overlapping two zones -> None
+    m_two = ZoneMembership(track_id=1, frame_index=1, x=10.0, y=10.0, zone_ids=("Zone1", "Zone2"))
+    assert m_two.primary_zone_id is None
+    assert m_two.is_in_zone is True
+
+    # Overlapping three zones -> None
+    m_three = ZoneMembership(track_id=1, frame_index=1, x=10.0, y=10.0, zone_ids=("Zone1", "Zone2", "Zone3"))
+    assert m_three.primary_zone_id is None
+    assert m_three.is_in_zone is True
+
+
+def test_inclusive_parameter_semantics():
+    """Verify inclusive=True and inclusive=False across interior, edges, vertices, exterior."""
+    square = ((100.0, 100.0), (200.0, 100.0), (200.0, 200.0), (100.0, 200.0))
+    zone = Zone(zone_id="square", vertices=square)
+
+    # 1. Interior -> True for both
+    assert zone.contains_point(150.0, 150.0, inclusive=True) is True
+    assert zone.contains_point(150.0, 150.0, inclusive=False) is True
+    assert zone.contains_point(105.0, 195.0, inclusive=True) is True
+    assert zone.contains_point(105.0, 195.0, inclusive=False) is True
+
+    # 2. Boundary edges -> True for inclusive=True, False for inclusive=False
+    edges = [
+        (150.0, 100.0),  # Top edge
+        (200.0, 150.0),  # Right edge
+        (150.0, 200.0),  # Bottom edge
+        (100.0, 150.0),  # Left edge
+    ]
+    for pt in edges:
+        assert zone.contains_point(pt[0], pt[1], inclusive=True) is True
+        assert zone.contains_point(pt[0], pt[1], inclusive=False) is False
+
+    # 3. Vertices -> True for inclusive=True, False for inclusive=False
+    vertices = [
+        (100.0, 100.0),  # Top-left vertex
+        (200.0, 100.0),  # Top-right vertex
+        (200.0, 200.0),  # Bottom-right vertex
+        (100.0, 200.0),  # Bottom-left vertex
+    ]
+    for pt in vertices:
+        assert zone.contains_point(pt[0], pt[1], inclusive=True) is True
+        assert zone.contains_point(pt[0], pt[1], inclusive=False) is False
+
+    # 4. Exterior -> False for both
+    exterior_points = [
+        (50.0, 150.0),
+        (250.0, 150.0),
+        (150.0, 50.0),
+        (150.0, 250.0),
+        (50.0, 50.0),
+    ]
+    for pt in exterior_points:
+        assert zone.contains_point(pt[0], pt[1], inclusive=True) is False
+        assert zone.contains_point(pt[0], pt[1], inclusive=False) is False
+
+    # Default parameter must be inclusive=True
+    assert zone.contains_point(150.0, 100.0) is True
+    assert zone.contains_point(100.0, 100.0) is True
+
+
+def test_deterministic_zone_ids_ordering():
+    """Verify zone_ids are sorted deterministically independent of registration order."""
+    # Three identical spatial zones with different IDs
+    verts = ((0.0, 0.0), (100.0, 0.0), (100.0, 100.0), (0.0, 100.0))
+    z_alpha = Zone("Alpha", verts)
+    z_beta = Zone("Beta", verts)
+    z_gamma = Zone("Gamma", verts)
+
+    # Register in order: Gamma, Beta, Alpha
+    engine1 = ZoneEngine([z_gamma, z_beta, z_alpha])
+    res1 = engine1.evaluate_point(50.0, 50.0)
+    assert res1 == ("Alpha", "Beta", "Gamma")
+
+    # Register in reverse order: Beta, Alpha, Gamma
+    engine2 = ZoneEngine([z_beta, z_alpha, z_gamma])
+    res2 = engine2.evaluate_point(50.0, 50.0)
+    assert res2 == ("Alpha", "Beta", "Gamma")
+
+    # Register in order: Alpha, Gamma, Beta
+    engine3 = ZoneEngine([z_alpha, z_gamma, z_beta])
+    res3 = engine3.evaluate_point(50.0, 50.0)
+    assert res3 == ("Alpha", "Beta", "Gamma")
 
 
 def test_zone_engine_duplicate_id_raises_value_error():

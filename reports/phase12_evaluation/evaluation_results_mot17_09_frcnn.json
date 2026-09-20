@@ -1,0 +1,213 @@
+{
+  "sequence_name": "MOT17-09-FRCNN",
+  "frames_processed": 525,
+  "total_sequence_frames": 525,
+  "fps": 30.0,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "detection_metrics": {
+    "true_positives": 3456,
+    "false_positives": 659,
+    "false_negatives": 1869,
+    "precision": 0.8398541919805589,
+    "recall": 0.6490140845070422,
+    "f1_score": 0.7322033898305084
+  },
+  "tracking_metrics": {
+    "total_gt": 5325,
+    "true_positives": 3399,
+    "false_positives": 590,
+    "false_negatives": 1926,
+    "id_switches": 95,
+    "mota": 0.5096713615023474,
+    "idf1": 0.4872235344642474,
+    "precision": 0.8520932564552519,
+    "recall": 0.6383098591549295
+  },
+  "trajectory_stats": {
+    "total_trajectories": 85,
+    "total_observations": 3989,
+    "mean_observations_per_track": 46.92941176470588,
+    "trajectories_with_gaps": 43,
+    "total_gaps": 115,
+    "min_gap_frames": 1,
+    "max_gap_frames": 30,
+    "mean_gap_frames": 6.982608695652174,
+    "median_gap_frames": 3.0,
+    "min_lifespan_frames": 1,
+    "max_lifespan_frames": 524,
+    "mean_lifespan_frames": 56.37647058823529,
+    "median_lifespan_frames": 30.0,
+    "min_lifespan_seconds": 0.03333333333333333,
+    "max_lifespan_seconds": 17.466666666666665,
+    "mean_lifespan_seconds": 1.8792156862745097,
+    "median_lifespan_seconds": 1.0,
+    "frame_coverage_ratio": 0.8324290484140233
+  },
+  "image_spatial": {
+    "total_detections": 4115,
+    "total_track_observations": 3989,
+    "total_footpoints": 3989,
+    "valid_footpoints": 3989,
+    "invalid_footpoints": 0,
+    "out_of_bounds_footpoints": 3,
+    "total_trajectories": 85,
+    "trajectories_with_gaps": 43,
+    "total_gaps": 115
+  },
+  "image_heatmap": {
+    "total_accumulated": 3986,
+    "grid_shape": [
+      22,
+      39
+    ],
+    "occupied_cells": 235,
+    "occupancy_ratio": 0.2738927738927739,
+    "max_cell_count": 361.0,
+    "out_of_bounds_points": 3,
+    "invalid_points": 0
+  },
+  "image_zone": {
+    "total_memberships": 3989,
+    "inside_at_least_one_zone": 2370,
+    "outside_all_zones": 1619,
+    "single_zone_observations": 2074,
+    "multi_zone_observations": 296,
+    "unique_visitors_per_zone": {
+      "Zone_Central": 47,
+      "Zone_Left": 22
+    }
+  },
+  "image_dwell": {
+    "total_visits": 128,
+    "unique_visitors": 54,
+    "total_dwell_seconds": 84.59999999999998,
+    "average_dwell_seconds": 0.6609374999999998,
+    "max_dwell_seconds": 4.866666666666666,
+    "visits_by_zone": {
+      "Zone_Central": 79,
+      "Zone_Left": 49
+    }
+  },
+  "ground_projection": {
+    "total_projected": 3989,
+    "valid_in_roi": 2144,
+    "valid_extrapolated": 1845,
+    "invalid_projections": 0,
+    "analytics_accepted": 3989,
+    "analytics_excluded": 0,
+    "error_codes": {}
+  },
+  "ground_heatmap": {
+    "total_accumulated": 2144,
+    "out_of_bounds": 1845,
+    "invalid": 0,
+    "extrapolated_rejected": 0,
+    "occupied_cells": 242,
+    "max_cell_count": 98.0
+  },
+  "ground_zone": {
+    "total_memberships": 3989,
+    "inside": 1663,
+    "outside": 2326,
+    "single": 1443,
+    "multi": 220
+  },
+  "ground_dwell": {
+    "total_visits": 85,
+    "unique_visitors": 42,
+    "total_seconds": 59.93333333333333,
+    "average_seconds": 0.7050980392156863,
+    "visits_by_zone": {
+      "Zone_Ground_Central": 59,
+      "Zone_Ground_Left": 26
+    }
+  },
+  "cross_space_comparison": {
+    "image_visits_total": 128,
+    "ground_visits_total": 85,
+    "image_unique_visitors": 54,
+    "ground_unique_visitors": 42,
+    "image_dwell_seconds_total": 84.59999999999998,
+    "ground_dwell_seconds_total": 59.93333333333333,
+    "visits_by_zone_image": {
+      "Zone_Left": 49,
+      "Zone_Central": 79
+    },
+    "visits_by_zone_ground": {
+      "Zone_Ground_Left": 26,
+      "Zone_Ground_Central": 59
+    },
+    "membership_agreement_count": 1619,
+    "membership_total_evaluated": 3989,
+    "agreement_ratio": 0.4058661318626222
+  },
+  "conservation_audit": {
+    "all_passed": true,
+    "checks": [
+      {
+        "name": "AC-03: Projection State Conservation",
+        "passed": true,
+        "left_value": 3989,
+        "right_value": 3989,
+        "details": "N_projected (3989) == In-ROI (2144) + Extrapolated (1845) + Invalid (0)"
+      },
+      {
+        "name": "AC-04: Image Heatmap Conservation",
+        "passed": true,
+        "left_value": 3989,
+        "right_value": 3989,
+        "details": "N_footpoints (3989) == Accumulated (3986) + OOB (3) + Invalid (0)"
+      },
+      {
+        "name": "AC-05: Ground Heatmap Conservation",
+        "passed": true,
+        "left_value": 3989,
+        "right_value": 3989,
+        "details": "N_ground_input (3989) == Accumulated (2144) + OOB (1845) + Invalid (0) + ExtrapRejected (0)"
+      },
+      {
+        "name": "AC-06a: Image Zone Conservation",
+        "passed": true,
+        "left_value": 3989,
+        "right_value": 3989,
+        "details": "N_footpoints (3989) == Inside (2370) + Outside (1619)"
+      },
+      {
+        "name": "AC-06b: Ground Zone Conservation",
+        "passed": true,
+        "left_value": 3989,
+        "right_value": 3989,
+        "details": "N_ground_obs (3989) == Inside (1663) + Outside (2326)"
+      },
+      {
+        "name": "AC-07a: Image Dwell Overlap Conservation",
+        "passed": true,
+        "left_value": 2666,
+        "right_value": 2666,
+        "details": "Total Dwell Observations (2666) == Total Zone Assignments (2666)"
+      },
+      {
+        "name": "AC-07b: Ground Dwell Overlap Conservation",
+        "passed": true,
+        "left_value": 1883,
+        "right_value": 1883,
+        "details": "Total Ground Dwell Observations (1883) == Total Ground Zone Assignments (1883)"
+      }
+    ]
+  },
+  "timing": {
+    "detection_ms": 34511.34769979399,
+    "tracking_ms": 177.13289964012802,
+    "footpoint_ms": 21.93990082014352,
+    "trajectory_ms": 5.47279923921451,
+    "heatmap_ms": 21.692000911571085,
+    "zone_ms": 94.59539863746613,
+    "dwell_ms": 13.09250044869259,
+    "total_ms": 35034.9842000287,
+    "fps": 14.985021742911758
+  },
+  "peak_rss_mb": 433.359375
+}
